@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Lead Dashboard</title>
+
+  <style>
+    :root {
+      --white: #ffffff;
+      --soft-white: #fffdf5;
+      --midnight: #061326;
+      --midnight2: #0a1f3f;
+      --gold: #f4d37a;
+      --soft-gold: #f8e8b4;
+      --dark-gold: #b8860b;
+      --gold-shadow: rgba(184, 134, 11, 0.38);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--white);
+      color: var(--midnight);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(6, 19, 38, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 19, 38, 0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridMove 18s linear infinite;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(184, 134, 11, 0.12), transparent 30%),
+        radial-gradient(circle at 90% 20%, rgba(6, 19, 38, 0.08), transparent 32%),
+        radial-gradient(circle at 50% 95%, rgba(184, 134, 11, 0.10), transparent 34%);
+      animation: softBg 9s ease-in-out infinite alternate;
+    }
+
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to { background-position: 48px 48px; }
+    }
+
+    @keyframes softBg {
+      from { transform: translateX(-18px); }
+      to { transform: translateX(18px); }
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      animation: loaderExit 1s ease forwards;
+      animation-delay: 1.25s;
+    }
+
+    .loader-box {
+      text-align: center;
+      color: var(--midnight);
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .loader-ring {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      border: 4px solid rgba(6, 19, 38, 0.12);
+      border-top-color: var(--dark-gold);
+      border-right-color: var(--midnight);
+      box-shadow: 0 0 35px rgba(184, 134, 11, 0.32);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes loaderExit {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 4px;
+      z-index: 6000;
+      background: linear-gradient(90deg, var(--midnight), var(--dark-gold), var(--gold));
+      box-shadow: 0 0 18px var(--gold-shadow);
+    }
+
+    .cursor-glow {
+      position: fixed;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(184, 134, 11, 0.13), transparent 68%);
+      pointer-events: none;
+      z-index: -1;
+      transform: translate(-50%, -50%);
+      transition: 0.08s linear;
+      filter: blur(5px);
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 3000;
+      padding: 16px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 2px solid rgba(184, 134, 11, 0.42);
+      box-shadow: 0 16px 42px rgba(6, 19, 38, 0.12);
+      overflow: hidden;
+      animation: headerDrop 0.85s ease forwards;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      left: -45%;
+      bottom: 0;
+      width: 45%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--dark-gold), var(--gold), transparent);
+      animation: headerLine 4s linear infinite;
+    }
+
+    @keyframes headerDrop {
+      from {
+        transform: translateY(-80px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes headerLine {
+      to { left: 125%; }
+    }
+
+    .brand h2 {
+      font-size: 25px;
+      font-weight: 950;
+      color: var(--midnight);
+    }
+
+    .brand p {
+      margin-top: 4px;
+      color: var(--dark-gold);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .btn {
+      position: relative;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+      padding: 12px 26px;
+      border-radius: 999px;
+      color: var(--midnight);
+      font-weight: 950;
+      background: linear-gradient(135deg, var(--dark-gold), var(--gold), #fff3c4);
+      box-shadow: 0 12px 30px rgba(184, 134, 11, 0.34);
+      transition: 0.35s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 18px 45px rgba(184, 134, 11, 0.48);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .profile-panel {
+      position: fixed;
+      top: 84px;
+      right: -430px;
+      z-index: 4000;
+      width: 370px;
+      padding: 24px;
+      border-radius: 30px 0 0 30px;
+      background: rgba(255, 253, 245, 0.96);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(184, 134, 11, 0.55);
+      box-shadow: -25px 35px 90px rgba(6, 19, 38, 0.24);
+      transition: right 0.65s cubic-bezier(.22,.9,.25,1);
+    }
+
+    .profile-panel.active {
+      right: 0;
+    }
+
+    .profile-panel h2 {
+      color: var(--midnight);
+      font-size: 30px;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(184, 134, 11, 0.45);
+    }
+
+    .profile-card {
+      margin: 14px 0;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, var(--midnight), var(--midnight2));
+      color: var(--soft-gold);
+      border: 2px solid rgba(184, 134, 11, 0.72);
+      line-height: 1.55;
+      word-break: break-word;
+      box-shadow: 0 14px 34px rgba(6, 19, 38, 0.20);
+      transition: 0.35s ease;
+    }
+
+    .profile-card:hover {
+      transform: translateX(-8px);
+      box-shadow: 0 18px 42px rgba(6, 19, 38, 0.24), 0 0 26px rgba(184, 134, 11, 0.30);
+    }
+
+    .profile-card strong {
+      color: var(--gold);
+    }
+
+    .close-btn {
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .photo-section {
+      padding: 42px 7% 18px;
+      text-align: center;
+    }
+
+    .photo-card {
+      position: relative;
+      width: min(430px, 92vw);
+      margin: auto;
+      border-radius: 34px;
+      overflow: hidden;
+      border: 4px solid var(--dark-gold);
+      background: var(--midnight);
+      box-shadow: 0 30px 80px rgba(6, 19, 38, 0.25), 0 0 40px rgba(184, 134, 11, 0.30);
+      opacity: 0;
+      transform: translateY(50px) scale(0.94);
+      animation: photoReveal 1s ease forwards 1.25s, photoFloat 5s ease-in-out infinite 2.5s;
+      transition: 0.5s ease;
+    }
+
+    .photo-card::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -28%;
+      height: 24%;
+      background: linear-gradient(to bottom, transparent, rgba(244, 211, 122, 0.26), transparent);
+      animation: photoScan 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .photo-card:hover {
+      transform: perspective(900px) rotateX(4deg) rotateY(-5deg) translateY(-8px);
+      box-shadow: 0 44px 105px rgba(6, 19, 38, 0.32), 0 0 58px rgba(184, 134, 11, 0.42);
+    }
+
+    .photo-card img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .name-badge {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      z-index: 5;
+      padding: 10px 18px;
+      border-radius: 16px;
+      background: var(--midnight);
+      color: var(--dark-gold);
+      border: 2px solid var(--dark-gold);
+      font-size: 15px;
+      font-weight: 950;
+      box-shadow: 0 12px 30px rgba(6, 19, 38, 0.40);
+    }
+
+    @keyframes photoReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes photoFloat {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -10px; }
+    }
+
+    @keyframes photoScan {
+      0% { top: -30%; opacity: 0; }
+      25% { opacity: 1; }
+      60% { top: 105%; opacity: 0.85; }
+      100% { top: 105%; opacity: 0; }
+    }
+
+    .hero-title {
+      padding: 20px 7% 12px;
+      text-align: center;
+    }
+
+    .hero-title h1 {
+      position: relative;
+      display: inline-block;
+      min-height: 78px;
+      font-size: clamp(34px, 6vw, 62px);
+      color: var(--midnight);
+      font-weight: 950;
+      letter-spacing: -1px;
+      animation: headingLift 4s ease-in-out infinite;
+    }
+
+    .hero-title h1 span {
+      background: linear-gradient(120deg, var(--midnight), var(--dark-gold), var(--gold));
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: titlePulse 3s ease-in-out infinite alternate;
+    }
+
+    .hero-title h1::after {
+      content: "|";
+      margin-left: 7px;
+      color: var(--dark-gold);
+      animation: cursorBlink 0.7s infinite;
+    }
+
+    .heading-line {
+      width: 0;
+      height: 4px;
+      margin: 6px auto 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, transparent, var(--dark-gold), var(--gold), transparent);
+      animation: headingUnderline 2.6s ease-in-out infinite;
+      box-shadow: 0 0 20px rgba(184, 134, 11, 0.35);
+    }
+
+    @keyframes cursorBlink {
+      50% { opacity: 0; }
+    }
+
+    @keyframes headingLift {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes headingUnderline {
+      0%, 100% {
+        width: 35%;
+        opacity: 0.55;
+      }
+      50% {
+        width: 82%;
+        opacity: 1;
+      }
+    }
+
+    @keyframes titlePulse {
+      from { filter: drop-shadow(0 0 4px rgba(184, 134, 11, 0.12)); }
+      to { filter: drop-shadow(0 0 16px rgba(184, 134, 11, 0.28)); }
+    }
+
+    .cards-section {
+      width: 100%;
+      padding: 58px 24px 95px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .cards-grid {
+      width: 100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+      gap: 28px;
+      perspective: 1600px;
+    }
+
+    .lead-card {
+      position: relative;
+      width: 340px;
+      flex: 0 0 340px;
+      min-height: 390px;
+      aspect-ratio: 1 / 1;
+      padding: 23px;
+      border-radius: 34px;
+      overflow: hidden;
+      cursor: pointer;
+      color: var(--soft-gold);
+      background:
+        linear-gradient(145deg, rgba(6, 19, 38, 0.99), rgba(10, 31, 63, 0.98)) padding-box,
+        conic-gradient(from var(--angle), var(--dark-gold), var(--gold), var(--midnight), var(--dark-gold)) border-box;
+      border: 4px solid transparent;
+      box-shadow:
+        0 30px 80px rgba(6, 19, 38, 0.30),
+        0 0 0 2px rgba(184, 134, 11, 0.18),
+        inset 0 0 35px rgba(244, 211, 122, 0.08);
+      opacity: 0;
+      transform: translateY(125px) rotateX(18deg) rotateZ(-8deg) scale(0.76);
+      transition:
+        opacity 1s ease,
+        transform 1s cubic-bezier(.22,.9,.25,1),
+        box-shadow 0.35s ease;
+      animation: borderSpin 7s linear infinite paused;
+    }
+
+    @property --angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    @keyframes borderSpin {
+      to { --angle: 360deg; }
+    }
+
+    .lead-card.visible {
+      opacity: 1;
+      transform: translateY(0) rotateX(0) rotateZ(0) scale(1);
+      animation: cardFloat 5.4s ease-in-out infinite, borderSpin 7s linear infinite;
+    }
+
+    .lead-card:nth-child(2n).visible { animation-delay: 0.25s, 0s; }
+    .lead-card:nth-child(3n).visible { animation-delay: 0.5s, 0s; }
+
+    @keyframes cardFloat {
+      0%, 100% { translate: 0 0; }
+      50% { translate: 0 -13px; }
+    }
+
+    .lead-card:hover {
+      box-shadow:
+        0 48px 120px rgba(6, 19, 38, 0.42),
+        0 0 52px rgba(184, 134, 11, 0.42),
+        inset 0 0 48px rgba(244, 211, 122, 0.10);
+    }
+
+    .lead-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      z-index: 1;
+      background: linear-gradient(120deg, transparent, rgba(255, 244, 196, 0.32), transparent);
+      transform: translateX(-145%);
+      transition: 0.85s ease;
+    }
+
+    .lead-card:hover::before {
+      transform: translateX(145%);
+    }
+
+    .lead-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 85% 10%, rgba(244, 211, 122, 0.16), transparent 35%),
+        radial-gradient(circle at 10% 90%, rgba(46, 155, 255, 0.10), transparent 42%);
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 80px;
+      top: -90px;
+      background: linear-gradient(to bottom, transparent, rgba(244, 211, 122, 0.14), transparent);
+      z-index: 2;
+      pointer-events: none;
+      animation: cardScan 4.8s ease-in-out infinite;
+    }
+
+    @keyframes cardScan {
+      0% { top: -90px; opacity: 0; }
+      22% { opacity: 1; }
+      55% { top: 105%; opacity: 0.75; }
+      100% { top: 105%; opacity: 0; }
+    }
+
+    .card-top,
+    .lead-content {
+      position: relative;
+      z-index: 3;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .lead-title {
+      color: var(--gold);
+      font-size: 21px;
+      line-height: 1.15;
+      padding-right: 8px;
+    }
+
+    .num-badge {
+      flex: 0 0 auto;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--midnight);
+      font-weight: 950;
+      background: linear-gradient(135deg, var(--dark-gold), var(--gold), #fff3c4);
+      box-shadow: 0 0 24px rgba(184, 134, 11, 0.42);
+    }
+
+    .lead-content {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 7px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .lead-content p {
+      margin-bottom: 8px;
+    }
+
+    .lead-content strong {
+      color: var(--gold);
+    }
+
+    .lead-content::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .lead-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 99px;
+    }
+
+    .lead-content::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--dark-gold), var(--gold));
+      border-radius: 99px;
+    }
+
+    .ripple {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      z-index: 20;
+      pointer-events: none;
+      background: rgba(244, 211, 122, 0.42);
+      transform: translate(-50%, -50%) scale(0);
+      animation: rippleEffect 0.7s ease-out forwards;
+    }
+
+    @keyframes rippleEffect {
+      to {
+        transform: translate(-50%, -50%) scale(30);
+        opacity: 0;
+      }
+    }
+
+    .back-top {
+      position: fixed;
+      right: 22px;
+      bottom: 24px;
+      z-index: 2200;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: none;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      color: var(--midnight);
+      font-size: 22px;
+      font-weight: 950;
+      background: linear-gradient(135deg, var(--dark-gold), var(--gold), #fff3c4);
+      box-shadow: 0 14px 32px rgba(184, 134, 11, 0.36);
+      transition: 0.35s ease;
+    }
+
+    .back-top.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .back-top:hover {
+      transform: translateY(-7px);
+      box-shadow: 0 0 35px rgba(184, 134, 11, 0.45);
+    }
+
+    footer {
+      padding: 34px 7%;
+      text-align: center;
+      color: var(--dark-gold);
+      background: var(--white);
+      border-top: 1px solid rgba(184, 134, 11, 0.35);
+      font-weight: 850;
+    }
+
+    button:focus-visible,
+    .lead-card:focus-visible {
+      outline: 3px solid var(--dark-gold);
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 760px) {
+      header {
+        padding: 14px 5%;
+      }
+
+      .brand h2 {
+        font-size: 18px;
+      }
+
+      .brand p {
+        font-size: 9px;
+      }
+
+      .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      .profile-panel {
+        width: 90%;
+      }
+
+      .photo-section {
+        padding: 30px 5% 16px;
+      }
+
+      .hero-title {
+        padding: 18px 5% 10px;
+      }
+
+      .hero-title h1 {
+        min-height: 58px;
+        font-size: 36px;
+      }
+
+      .cards-section {
+        padding: 48px 16px 85px;
+      }
+
+      .lead-card {
+        width: min(360px, 100%);
+        max-width: 360px;
+        flex: 0 0 min(360px, 100%);
+        min-height: 415px;
+      }
+
+      .lead-content {
+        max-height: 315px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+
+      .loader {
+        display: none;
+      }
+
+      .lead-card,
+      .photo-card {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loader" aria-hidden="true">
+    <div class="loader-box">
+      <div class="loader-ring"></div>
+      <h2>Opening Leads</h2>
+    </div>
+  </div>
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <header>
+    <div class="brand">
+      <h2>Internship Squad</h2>
+      <p>Business Lead Dashboard</p>
+    </div>
+
+    <button class="btn" id="profileBtn" aria-label="Open profile section">
+      Profile
+    </button>
+  </header>
+
+  <aside class="profile-panel" id="profilePanel" aria-label="Profile section">
+    <h2>Profile</h2>
+
+    <div class="profile-card">
+      <strong>Name</strong><br>
+      Mohammad Shahzad
+    </div>
+
+    <div class="profile-card">
+      <strong>Brand Name</strong><br>
+      Internship Squad
+    </div>
+
+    <div class="profile-card">
+      <strong>Email</strong><br>
+      shahzad09611@gmail.com
+    </div>
+
+    <div class="profile-card">
+      <strong>Website</strong><br>
+      www.prabhatyashi.com
+    </div>
+
+    <button class="btn close-btn" id="closeProfile">
+      Close
+    </button>
+  </aside>
+
+  <main>
+    <section class="photo-section">
+      <div class="photo-card" id="photoCard">
+        <img src="IMG_20260610_124926.jpg" alt="Mohammad Shahzad">
+        <div class="name-badge">Mohammad Shahzad</div>
+      </div>
+    </section>
+
+    <section class="hero-title">
+      <h1 id="typingHeading"></h1>
+      <div class="heading-line"></div>
+    </section>
+
+    <section class="cards-section">
+      <div class="cards-grid" id="cardsGrid"></div>
+    </section>
+  </main>
+
+  <button class="back-top" id="backTop" aria-label="Back to top">↑</button>
+
+  <footer>
+    Designed for Internship Squad | www.prabhatyashi.com
+  </footer>
+
+  <script>
+    const profileBtn = document.getElementById("profileBtn");
+    const closeProfile = document.getElementById("closeProfile");
+    const profilePanel = document.getElementById("profilePanel");
+    const scrollProgress = document.getElementById("scrollProgress");
+    const backTop = document.getElementById("backTop");
+    const cursorGlow = document.getElementById("cursorGlow");
+    const photoCard = document.getElementById("photoCard");
+    const cardsGrid = document.getElementById("cardsGrid");
+    const typingHeading = document.getElementById("typingHeading");
+
+    let audioContext;
+
+    const businesses = [
+      {
+        title: "Kavita Marbles",
+        points: [
+          ["1.Buisness Name", "Kavita Marbles."],
+          ["2.Locatio", "Makrana Road, Kishangarh (Near Makrana Choraha)"],
+          ["3.Owner", "Padam Jain (Father) Aayush Jain (Son)"],
+          ["4.Social Media Page", "Doesn't have but want."],
+          ["5.Current Digital Presence", "No digital presence."],
+          ["6.Website", "Doesn't have but want."],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say anything."],
+          ["8.Needfull Services", "Website, qr code, digital visiting card and add of their website."],
+          ["9.AI Services selling", "Website,qr code, digital visiting card and add of their website."],
+          ["10.Smart Home/IoT Project", "Can't say anything."]
+        ]
+      },
+      {
+        title: "Shekh Marble Suppliers",
+        points: [
+          ["1.Buisness", "Shekh Marble Suppliers"],
+          ["2.Location", "Add-sp-7B, 4th phase, Riico Industrial Area (Kishangarh)"],
+          ["3.Owner", "Haaji Shekh Mohammad Salim (9829073899) Or Khalid Sheikh(8619768061)"],
+          ["4.Social Media Page", "Doesn't have."],
+          ["5.Current digital presence", "No current digital presence."],
+          ["6.Website", "No website is present"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say something"],
+          ["8.Needfull Services", "Website, qr code and digital visiting card"],
+          ["9.AI Service selling", "Website, qr code and digital visiting card"],
+          ["10.Smart home/ IoT Project", "Can't say something"]
+        ]
+      },
+      {
+        title: "Nakoda Maebles",
+        points: [
+          ["1.Buisness", "Nakoda Maebles"],
+          ["2.Location", "Makrana Road, IND. Area, (Kishangarh)"],
+          ["3.Owner", "Sattu Ji Nakoda (Main Owner) (9829081621) Norat Bohra (9828297360)"],
+          ["4.Social Media Page", "Have website through \"indiamart\""],
+          ["5.Current digital presence", "Not sure"],
+          ["6.Website", "No sure"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say something"],
+          ["8.Needfull Services", "In waiting list"],
+          ["9.AI Service selling", "In waiting list"],
+          ["10.Smart home/ IoT Project", "Can't say something."]
+        ]
+      },
+      {
+        title: "Durga Marbles",
+        points: [
+          ["1.Buisness", "Durga Marbles"],
+          ["2.Location", "Makrana Road, Madanganj-Kishangarh (Ajmer)"],
+          ["3.Owner", "In waiting list"],
+          ["4.Social Media Page", "Not have"],
+          ["5.Current digital presence", "Have no digital presence"],
+          ["6.Website", "Have no website"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say something"],
+          ["8.Needfull Services", "Website, qr code and digital visiting card"],
+          ["9.AI Service selling", "Website, qr code and digital visiting card"],
+          ["10.Smart home/ IoT Project", "Have least chances"]
+        ]
+      },
+      {
+        title: "M.S. Granites",
+        points: [
+          ["1.Buisness", "M.S. Granites"],
+          ["2.Location", "Makrana Road, Kishngarh"],
+          ["3.Owner", "Rahuf Roopangarh (921431240p)"],
+          ["4.Social Media Page", "Can't say something"],
+          ["5.Current digital presence", "Have chances but not clear"],
+          ["6.Website", "Have chances"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Have chances"],
+          ["8.Needfull Services", "Can't say something"],
+          ["9.AI Service selling", "Not sure"],
+          ["10.Smart home/ IoT Project", "Very least chances"]
+        ]
+      },
+      {
+        title: "Siddharth Stonex",
+        points: [
+          ["1.Buisness", "Siddharth Stonex"],
+          ["2.Location", "Makrana Road, Kishangarh (Ajmer)"],
+          ["3.Owner", "Siddharth Stonex (9785029513)"],
+          ["4.Social Media Page", "Have no page"],
+          ["5.Current digital presence", "No digital presence"],
+          ["6.Website", "Not have website"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say something"],
+          ["8.Needfull Services", "Website, qr code and digital visiting card"],
+          ["9.AI Service selling", "Website, qr code and digital visiting card"],
+          ["10.Smart home/ IoT Project", "Very least chances"]
+        ]
+      },
+      {
+        title: "Ramchandra Marbles",
+        points: [
+          ["1.Buisness", "Ramchandra Marbles"],
+          ["2.Location", "Makrana Road, Kishangarh (Ajmer)"],
+          ["3.Owner", "In waiting list"],
+          ["4.Social Media Page", "Have no media page"],
+          ["5.Current digital presence", "No digital presence"],
+          ["6.Website", "Doesn't have website"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say something"],
+          ["8.Needfull Services", "Website, visiting card and qr code"],
+          ["9.AI Service selling", "Website, qr code and digital visiting cards"],
+          ["10.Smart home/ IoT Project", "Very least chances"]
+        ]
+      },
+      {
+        title: "M.M. Enterprises",
+        points: [
+          ["1.Buisness", "M.M. Enterprises"],
+          ["2.Location", "Makrana Road, Kishangarh (Ajmer)"],
+          ["3.Owner", "In waiting list"],
+          ["4.Social Media Page", "Not sure"],
+          ["5.Current digital presence", "Can't say something"],
+          ["6.Website", "Have chances"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Have chances"],
+          ["8.Needfull Services", "Can't say something"],
+          ["9.AI Service selling", "Can't say something"],
+          ["10.Smart home/ IoT Project", "Very least chances"]
+        ]
+      },
+      {
+        title: "Shree Ram Marble Udhyog",
+        points: [
+          ["1.Buisness", "Shree Ram Marble Udhyog"],
+          ["2.Location", "Makrana Road, Madanganj-Kishangarh"],
+          ["3.Owner", "Arun Anchali (Main Owner) (9828054645) Gaffar (Munim) (9887266613)"],
+          ["4.Social Media Page", "Doesn't have"],
+          ["5.Current digital presence", "No digital presence"],
+          ["6.Website", "Doens't have website."],
+          ["7.Insta/Facebook/Google Buisness Quality", "Can't say something"],
+          ["8.Needfull Services", "Website, qr code, visiting card."],
+          ["9.AI Service selling", "Website, qr code and digital visiting card"],
+          ["10.Smart home/ IoT Project", "Have chances."]
+        ]
+      },
+      {
+        title: "Chandrakanta Marbles",
+        points: [
+          ["1.Buisness", "Chandrakanta Marbles"],
+          ["2.Location", "Makrana Road, Madanganj-Kishangarh"],
+          ["3.Owner", "Prakash Sharma (8619125073) CA Pawan Kumar Sharma (8890418021)"],
+          ["4.Social Media Page", "Doesn't have any page on social media page."],
+          ["5.Current digital presence", "Not found"],
+          ["6.Website", "No website"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Have Chances"],
+          ["8.Needfull Services", "Website and qr code"],
+          ["9.AI Service selling", "Website, qr code and digital visiting cards"],
+          ["10.Smart home/ IoT Project", "Least chances."]
+        ]
+      },
+      {
+        title: "Hero Marbles",
+        points: [
+          ["1.Buisness", "Hero Marbles"],
+          ["2.Location", "Makrana Road, Madanganj-Kishangarh"],
+          ["3.Owner", "Onka Ram Sheel Sunita Marbles and Granites (9587235307) Bhawani Singh (9875117700)"],
+          ["4.Social Media Page", "Have chances"],
+          ["5.Current digital presence", "Can't say anything clearly"],
+          ["6.Website", "No website"],
+          ["7.Insta/Facebook/Google Buisness Quality", "Have chances"],
+          ["8.Needfull Services", "Website, qr code and digital visiting cards"],
+          ["9.AI Service selling", "Website, qr code and digital visiting cards"],
+          ["10.Smart home/ IoT Project", "Least chances"]
+        ]
+      }
+    ];
+
+    function typeHeading() {
+      const text = "Business Lead Dashboard";
+      let i = 0;
+
+      function typing() {
+        if (i <= text.length) {
+          const current = text.slice(0, i);
+
+          if (current.includes("Dashboard")) {
+            const before = current.replace("Dashboard", "");
+            const after = current.replace("Business Lead ", "");
+            typingHeading.innerHTML = before + "<span>" + after + "</span>";
+          } else {
+            typingHeading.textContent = current;
+          }
+
+          i++;
+          setTimeout(typing, 90);
+        }
+      }
+
+      setTimeout(typing, 1500);
+    }
+
+    function renderCards() {
+      businesses.forEach((business, index) => {
+        const card = document.createElement("article");
+        card.className = "lead-card";
+        card.tabIndex = 0;
+
+        const pointsHTML = business.points.map(item => {
+          return `<p><strong>${item[0]}</strong> - ${item[1]}</p>`;
+        }).join("");
+
+        card.innerHTML = `
+          <span class="scan-line"></span>
+          <div class="card-top">
+            <h3 class="lead-title">${business.title}</h3>
+            <div class="num-badge">${index + 1}</div>
+          </div>
+          <div class="lead-content">${pointsHTML}</div>
+        `;
+
+        cardsGrid.appendChild(card);
+      });
+    }
+
+    renderCards();
+    typeHeading();
+
+    const cards = document.querySelectorAll(".lead-card");
+
+    document.addEventListener("mousemove", (event) => {
+      cursorGlow.style.left = event.clientX + "px";
+      cursorGlow.style.top = event.clientY + "px";
+    });
+
+    function clickSound() {
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        const now = audioContext.currentTime;
+        const gain = audioContext.createGain();
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.13, now + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+        gain.connect(audioContext.destination);
+
+        const osc1 = audioContext.createOscillator();
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(540, now);
+        osc1.frequency.exponentialRampToValueAtTime(980, now + 0.11);
+        osc1.connect(gain);
+        osc1.start(now);
+        osc1.stop(now + 0.17);
+
+        const osc2 = audioContext.createOscillator();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(880, now + 0.035);
+        osc2.frequency.exponentialRampToValueAtTime(1420, now + 0.15);
+        osc2.connect(gain);
+        osc2.start(now + 0.035);
+        osc2.stop(now + 0.22);
+      } catch (error) {
+        console.log("Sound could not play:", error);
+      }
+    }
+
+    function createRipple(event, element) {
+      const oldRipple = element.querySelector(".ripple");
+      if (oldRipple) oldRipple.remove();
+
+      const rect = element.getBoundingClientRect();
+      const ripple = document.createElement("span");
+
+      ripple.className = "ripple";
+      ripple.style.left = event.clientX - rect.left + "px";
+      ripple.style.top = event.clientY - rect.top + "px";
+
+      element.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 750);
+    }
+
+    profileBtn.addEventListener("click", (event) => {
+      profilePanel.classList.add("active");
+      clickSound();
+      createRipple(event, profileBtn);
+    });
+
+    closeProfile.addEventListener("click", (event) => {
+      profilePanel.classList.remove("active");
+      clickSound();
+      createRipple(event, closeProfile);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        profilePanel.classList.remove("active");
+      }
+    });
+
+    photoCard.addEventListener("mousemove", (event) => {
+      const rect = photoCard.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -4;
+      const rotateY = ((x - centerX) / centerX) * 4;
+      photoCard.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-8px)`;
+    });
+
+    photoCard.addEventListener("mouseleave", () => {
+      photoCard.style.transform = "";
+    });
+
+    cards.forEach((card) => {
+      card.addEventListener("click", (event) => {
+        clickSound();
+        createRipple(event, card);
+      });
+
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          clickSound();
+        }
+      });
+
+      card.addEventListener("mousemove", (event) => {
+        const rect = card.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+        card.style.transform = `translateY(-18px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.style.transform = "";
+      });
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, index) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => {
+            entry.target.classList.add("visible");
+          }, index * 90);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    cards.forEach(card => observer.observe(card));
+
+    window.addEventListener("load", () => {
+      cards.forEach((card, index) => {
+        setTimeout(() => {
+          card.classList.add("visible");
+        }, 1350 + index * 110);
+      });
+    });
+
+    window.addEventListener("scroll", () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const percent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      scrollProgress.style.width = percent + "%";
+
+      if (scrollTop > 450) {
+        backTop.classList.add("show");
+      } else {
+        backTop.classList.remove("show");
+      }
+    });
+
+    backTop.addEventListener("click", (event) => {
+      clickSound();
+      createRipple(event, backTop);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>
